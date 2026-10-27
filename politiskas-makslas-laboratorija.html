@@ -19,16 +19,33 @@
   --body:"Aptos","Segoe UI","Candara",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+#app{
+  position:absolute;top:0;left:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;
   background:var(--bg);
   color:var(--ink);
   font-family:var(--body);
-  font-size:clamp(16px,1.05vw + 13px,19px);
+  font-size:18px;
   line-height:1.55;
   -webkit-text-size-adjust:100%;
 }
-.wrap{max-width:1080px;margin:0 auto;padding:22px 18px 40px}
+.wrap{width:1600px;height:900px;padding:26px 30px;display:grid;grid-template-columns:400px 1fr;gap:30px}
+.side{display:flex;flex-direction:column;gap:18px;min-height:0}
+.side .steps{flex-direction:column;margin:0;flex-wrap:nowrap}
+.side .chip{flex:0 0 auto;padding:12px 14px;font-size:.88em}
+.side .foot{margin-top:auto}
+#labApp{min-height:0;overflow:auto;position:relative}
+#labApp .panel{margin-top:0}
+#labApp .grid{grid-template-columns:repeat(3,1fr);gap:16px}
+#labApp .card{padding:22px 20px;font-size:1.05em}
+#labApp .card .ico{flex-basis:44px;height:44px}
+#labApp .card svg{width:26px;height:26px}
+.res-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.res-grid .meters{grid-template-columns:1fr;margin-top:0}
+.res-grid .talk,.res-grid .note{margin-top:14px}
+#fsBtn{position:relative;z-index:2;align-self:flex-start;font-family:var(--body);font-size:15px;font-weight:600;background:var(--white);color:var(--deep);
+  border:1.5px solid var(--light);border-radius:999px;padding:9px 18px;cursor:pointer}
+#fsBtn:hover{background:var(--deep);color:#fff;border-color:var(--deep)}
 
 /* ---------- Galvene ---------- */
 .hero{
@@ -55,7 +72,7 @@ body{
 }
 h1{
   font-family:var(--display);
-  font-size:clamp(1.7rem,3.4vw,2.5rem);
+  font-size:2.1rem;
   line-height:1.12;margin:0 0 10px;font-weight:700;
   position:relative;z-index:1;
 }
@@ -90,7 +107,7 @@ h1{
 /* ---------- Solis ---------- */
 .panel{margin-top:22px;animation:rise .32s ease both}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.q{font-family:var(--display);font-size:clamp(1.25rem,2.2vw,1.6rem);margin:0 0 4px;color:var(--deep)}
+.q{font-family:var(--display);font-size:1.9rem;margin:0 0 4px;color:var(--deep)}
 .hint{margin:0 0 16px;color:var(--muted);font-size:.92em}
 
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
@@ -115,7 +132,7 @@ h1{
   box-shadow:0 10px 30px rgba(107,47,160,.1);
 }
 .label .kind{font-size:.72em;letter-spacing:.16em;text-transform:uppercase;color:var(--bright);font-weight:700;margin:0 0 8px}
-.label h2{font-family:var(--display);font-size:clamp(1.6rem,3.2vw,2.3rem);margin:0 0 2px;color:var(--deep);line-height:1.14}
+.label h2{font-family:var(--display);font-size:2.1rem;margin:0 0 2px;color:var(--deep);line-height:1.14}
 .label .meta{font-size:.86em;color:var(--muted);margin:0 0 16px}
 .label .rule{height:1px;background:var(--line);margin:16px 0}
 .label .desc{margin:0 0 12px}
@@ -161,20 +178,15 @@ h1{
 .foot{margin-top:26px;text-align:center;font-size:.8em;color:var(--muted)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-@media (max-width:520px){
-  .wrap{padding:14px 12px 30px}
-  .hero{padding:20px 18px}
-  .chip{flex:1 1 100%}
-  .label{padding:20px 18px}
-}
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
+<div id="app">
 <div class="wrap">
-
+ <div class="side">
   <header class="hero">
     <p class="eyebrow">9. klase · 5. tēma · Identitāte un laikmets mākslā</p>
     <h1>Politiskās mākslas laboratorija</h1>
@@ -182,10 +194,13 @@ h1{
   </header>
 
   <nav class="steps" id="steps" aria-label="Darba soļi"></nav>
-
-  <main id="app" aria-live="polite"></main>
+  <button id="fsBtn" type="button">⛶ Atvērt pilnekrānu</button>
 
   <p class="foot">visaskola.lv · Rīks nesaglabā datus. Aizverot lapu, viss izzūd.</p>
+ </div>
+
+  <main id="labApp" aria-live="polite"></main>
+</div>
 </div>
 
 <script>
@@ -356,7 +371,7 @@ const Q_AUD = {
 let step = 0;
 const pick = { tema:null, medijs:null, tonis:null, auditorija:null };
 
-const app = document.getElementById("app");
+const app = document.getElementById("labApp");
 const nav = document.getElementById("steps");
 
 function svg(k){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+I[k]+'</svg>'; }
@@ -446,6 +461,8 @@ function renderResult(){
   const desc = `Darbs ir ${m.frag}, kas pievēršas ${t.frag}. ${o.frag} Tas ir domāts ${a.frag}.`;
 
   app.innerHTML = `<section class="panel">
+   <div class="res-grid">
+    <div>
     <article class="label">
       <p class="kind">Darba etiķete</p>
       <h2>„${esc(title)}”</h2>
@@ -454,8 +471,6 @@ function renderResult(){
       <div class="rule"></div>
       <p class="kicker">Autors nav pateicis, kas ir pareizi. Autors ir uzdevis jautājumu.</p>
     </article>
-
-    <div class="meters">${meters}</div>
 
     <div class="talk">
       <h3>Divi jautājumi grupas sarunai</h3>
@@ -469,6 +484,9 @@ function renderResult(){
       Tas nav vērtējums. Tas ir sarunas sākums.
       <span>Rādītāji nav mērījums — tie ir pieņēmumi, ko var apstrīdēt. Ja tev šķiet citādi, pamato kāpēc: tieši tā strādā mākslas kritika.</span>
     </div>
+    </div>
+    <div>
+    <div class="meters">${meters}</div>
 
     <div class="actions">
       <button class="btn btn-main" type="button" id="copy">Kopēt etiķeti</button>
@@ -476,6 +494,8 @@ function renderResult(){
       <button class="btn btn-back" type="button" id="reset">Sākt no jauna</button>
     </div>
     <p class="hint" style="margin-top:12px">Pamēģini nomainīt tikai <b>toni</b> vai tikai <b>vietu</b> un salīdzini, cik ļoti mainās rezultāts.</p>
+    </div>
+   </div>
   </section>`;
 
   document.getElementById("reset").onclick = ()=>{
@@ -513,6 +533,7 @@ function render(){
   reportHeight();
 }
 function reportHeight(){
+  return; /* 16:9 versijā iframe augstumu nosaka proporcija */
   try{
     if(window.parent !== window){
       window.parent.postMessage({type:"visaskola-height", height:document.documentElement.scrollHeight}, "*");
@@ -521,6 +542,38 @@ function reportHeight(){
 }
 window.addEventListener("resize", reportHeight);
 render();
+</script>
+
+<script>
+/* ── 16:9 mērogošana un pilnekrāns ── */
+(function(){
+  const app = document.getElementById('app');
+  window.APP_SCALE = 1;
+  function fitApp(){
+    const W = window.innerWidth, H = window.innerHeight;
+    const sc = Math.min(W/1600, H/900); window.APP_SCALE = sc;
+    app.style.transform = 'scale(' + sc + ')';
+    app.style.left = Math.max(0,(W-1600*sc)/2) + 'px';
+    app.style.top  = Math.max(0,(H-900*sc)/2) + 'px';
+  }
+  window.addEventListener('resize', fitApp); fitApp();
+  const btn = document.getElementById('fsBtn');
+  function isFs(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function fallback(){ if(confirm('Pilnekrāna režīms šajā logā nav pieejams. Atvērt rīku jaunā cilnē?')) window.open(location.href,'_blank'); }
+  function toggle(){
+    const el = document.documentElement;
+    try{
+      if(isFs()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else if(el.requestFullscreen) el.requestFullscreen().catch(fallback);
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else fallback();
+    }catch(e){ fallback(); }
+  }
+  function upd(){ btn.textContent = isFs() ? '✕ Iziet no pilnekrāna' : '⛶ Atvērt pilnekrānu'; setTimeout(fitApp, 60); }
+  btn.addEventListener('click', toggle);
+  document.addEventListener('fullscreenchange', upd);
+  document.addEventListener('webkitfullscreenchange', upd);
+})();
 </script>
 </body>
 </html>
